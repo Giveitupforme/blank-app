@@ -6,7 +6,7 @@ import json
 import pandas as pd
 from openai import OpenAI
 import google.generativeai as genai
-from apikey import GEMINI_API_KEY
+from apikey import FMP_API_KEY, GEMINI_API_KEY
 
 def get_jsonparsed_data(url):
     response = requests.get(url)
