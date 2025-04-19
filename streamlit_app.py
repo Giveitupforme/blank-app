@@ -15,7 +15,6 @@ def get_jsonparsed_data(url):
     else:
         st.error(f"Failed to fetch data: {response.status_code}")
         return None
-from apikey import OPENAI_API_KEY, FMP_API_KEY
 openai.api_key = OPENAI_API_KEY
 def get_financial_statements(ticker, limit, period, statement_type):
     if statement_type == "Income Statement":
