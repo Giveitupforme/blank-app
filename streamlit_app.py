@@ -5,6 +5,8 @@ import os
 import json
 import pandas as pd
 from openai import OpenAI
+import google.generativeai as genai
+from apikey import GEMINI_API_KEY
 
 def get_jsonparsed_data(url):
     response = requests.get(url)
@@ -31,55 +33,60 @@ def get_financial_statements(ticker, limit, period, statement_type):
         st.error("Unable to fetch financial statements. Please ensure the ticker is correct and try again.")
         return pd.DataFrame()
 
+genai.configure(api_key=GEMINI_API_KEY)
+
 def generate_financial_summary(financial_statements, statement_type):
     """
-    Generate a summary of financial statements for the statements using GPT-3.5 Turbo or GPT-4.
+    Generate a summary of financial statements using Gemini, mimicking the GPT-based structure.
     """
-    
-    # Create a summary of key financial metrics for all four periods
+
     summaries = []
     for i in range(len(financial_statements)):
+        date = financial_statements['date'][i]
+        
         if statement_type == "Income Statement":
             summary = f"""
-                For the period ending {financial_statements['date'][i]}, the company reported the following:
-                ...
-                """
+For the period ending {date}, the company reported the following key income statement metrics:
+- Revenue: {financial_statements['revenue'][i]}
+- Gross Profit: {financial_statements['grossProfit'][i]}
+- Operating Income: {financial_statements['operatingIncome'][i]}
+- Net Income: {financial_statements['netIncome'][i]}
+"""
+        
         elif statement_type == "Balance Sheet":
             summary = f"""
-                For the period ending {financial_statements['date'][i]}, the company reported the following:
-                ...
-                """
+For the period ending {date}, the company reported the following key balance sheet metrics:
+- Total Assets: {financial_statements['totalAssets'][i]}
+- Total Liabilities: {financial_statements['totalLiabilities'][i]}
+- Total Equity: {financial_statements['totalStockholdersEquity'][i]}
+"""
+        
         elif statement_type == "Cash Flow":
             summary = f"""
-                For the period ending {financial_statements['date'][i]}, the company reported the following:
-                ...
-                """
-        summaries.append(summary)
-            # Combine all summaries into a single string
+For the period ending {date}, the company reported the following key cash flow metrics:
+- Operating Cash Flow: {financial_statements['operatingCashFlow'][i]}
+- Investing Cash Flow: {financial_statements['cashflowFromInvestment'][i]}
+- Financing Cash Flow: {financial_statements['cashflowFromFinancing'][i]}
+- Net Cash Flow: {financial_statements['netCashFlow'][i]}
+"""
+
+        summaries.append(summary.strip())
+
     all_summaries = "\n\n".join(summaries)
-    # Call GPT-4 for analysis
-    client = openai.OpenAI()
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an AI trained to provide financial analysis based on financial statements.",
-            },
-            {
-                "role": "user",
-                "content": f"""
-                Please analyze the following data and provide insights:\n{all_summaries}.\n 
-                Write each section out as instructed in the summary section and then provide analysis of how it's changed over the time period.
-                ...
-                """
-            }
-        ]
-    )
-    summary = response.choices[0].message.content
+    prompt = f"""
+You are an AI trained to provide financial analysis based on financial statements.
 
-    return response['choices'][0]['message']['content']
+Please analyze the following data and provide insights for the {statement_type.lower()} of a company over the reported time periods.
+
+Summarize each period’s data and then provide a concluding section that discusses trends, anomalies, and insights over time:
+
+{all_summaries}
+"""
+
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
+    return response.text
 def financial_statements():
     st.title('GPT-4 & Financial Statements')
 
