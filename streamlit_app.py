@@ -4,6 +4,7 @@ import requests
 import os
 import json
 import pandas as pd
+from openai import OpenAI
 
 def get_jsonparsed_data(url):
     response = requests.get(url)
@@ -57,6 +58,8 @@ def generate_financial_summary(financial_statements, statement_type):
             # Combine all summaries into a single string
     all_summaries = "\n\n".join(summaries)
     # Call GPT-4 for analysis
+    client = openai.OpenAI()
+
     response = openai.ChatCompletion.create(
         model="gpt-4",
         messages=[
@@ -74,6 +77,7 @@ def generate_financial_summary(financial_statements, statement_type):
             }
         ]
     )
+    summary = response.choices[0].message.content
 
     return response['choices'][0]['message']['content']
 def financial_statements():
