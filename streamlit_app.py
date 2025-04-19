@@ -1,10 +1,8 @@
 import streamlit as st
-import openai
 import requests
 import os
 import json
 import pandas as pd
-from openai import OpenAI
 import google.generativeai as genai
 from apikey import FMP_API_KEY, GEMINI_API_KEY
 
@@ -15,7 +13,6 @@ def get_jsonparsed_data(url):
     else:
         st.error(f"Failed to fetch data: {response.status_code}")
         return None
-openai.api_key = OPENAI_API_KEY
 def get_financial_statements(ticker, limit, period, statement_type):
     if statement_type == "Income Statement":
         url = f"https://financialmodelingprep.com/api/v3/income-statement/{ticker}?period={period}&limit={limit}&apikey={FMP_API_KEY}"
