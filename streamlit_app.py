@@ -3,6 +3,7 @@ import openai
 import requests
 import os
 import json
+import pandas as pd
 
 def get_jsonparsed_data(url):
     response = requests.get(url)
