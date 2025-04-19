@@ -2,6 +2,15 @@ import streamlit as st
 import openai
 import requests
 import os
+import json
+
+def get_jsonparsed_data(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        st.error(f"Failed to fetch data: {response.status_code}")
+        return None
 from apikey import OPENAI_API_KEY, FMP_API_KEY
 openai.api_key = OPENAI_API_KEY
 def get_financial_statements(ticker, limit, period, statement_type):
